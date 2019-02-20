@@ -8,7 +8,6 @@ async function start() {
   var response = await getVertices(fileName);
   console.log(response);
 }
-start();
 
 async function getVertices(fileName) {
   const [result] = await client.documentTextDetection(fileName);
@@ -80,3 +79,5 @@ function getParagraphs(annotation) {
 
     return paragraphs;
 }
+
+module.exports = start;
