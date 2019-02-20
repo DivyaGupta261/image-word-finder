@@ -3,24 +3,18 @@ const vision = require('@google-cloud/vision');
 // Creates a client
 const client = new vision.ImageAnnotatorClient();
 
-
-console.log('Server started! At http://localhost:' + port);
-
-
-// app.post('/api/getVertices', async function(req, res) {
-    // var data = req.body.query;
-    // console.log(data);
-    const fileName = '1003-set.png';
-    var response = await getVertices(fileName);
-    console.log(response);
-    // res.send(response);
-// });
+async function start() {
+  const fileName = 'image-file-name.png';
+  var response = await getVertices(fileName);
+  console.log(response);
+}
+start();
 
 async function getVertices(fileName) {
   const [result] = await client.documentTextDetection(fileName);
   const annotation = result.fullTextAnnotation;
   let paragraphs = getParagraphs(annotation);
-  // console.log(paragraphs);
+  console.log(paragraphs);
   let knownFields = getFields(paragraphs);
   return knownFields;
 }
@@ -49,54 +43,40 @@ function getFields(paragraphs){
 }
 
 function getParagraphs(annotation) {
-  let paragraphs = []
-  let lines = []
-  for (let pageIndex in annotation.pages) {
-    let page = annotation.pages[pageIndex];
-    for(let blockIndex in page.blocks) {
-      let block = page.blocks[blockIndex];
-      for(let paragraphIndex in block.paragraphs) {
-        let paragraph = block.paragraphs[paragraphIndex];
-    para = ""
-    line = ""
-    for(let wordIndex in paragraph.words) {
-      let word = paragraph.words[wordIndex];
-      for (let symbolIndex in word.symbols){
-        let symbol = word.symbols[symbolIndex];
-        line += symbol.text;
-        // if (symbol.property && symbol.property.detected_break && symbol.property.detected_break.type == " ")
-        //     line += ' '
-        if (symbol.text == " ") {
-          line += ' '
-          lines.push(line)
-          para += line
-          line = ''
+    let paragraphs = []
+    let lines = []
+    for (let pageIndex in annotation.pages) {
+        let page = annotation.pages[pageIndex];
+        for (let blockIndex in page.blocks) {
+            let block = page.blocks[blockIndex];
+            for (let paragraphIndex in block.paragraphs) {
+                let paragraph = block.paragraphs[paragraphIndex];
+                para = ""
+                line = ""
+                for (let wordIndex in paragraph.words) {
+                    let word = paragraph.words[wordIndex];
+                    for (let symbolIndex in word.symbols) {
+                        let symbol = word.symbols[symbolIndex];
+                        line += symbol.text;
+                    }
+                    line += ' '
+                    lines.push({
+                        text: line,
+                        vertices: word.boundingBox.vertices,
+                    });
+                    para += line
+                    line = ''
+                }
+                paragraphs.push({
+                    text: para.trim(),
+                    vertices: paragraph.boundingBox.vertices,
+                    lines: lines.map(l => l)
+                });
+                lines = [];
+                console.log(lines);
+            }
         }
-        if (symbol.text === "\n") {
-          lines.push(line)
-          para += line
-          line = ''
-        }
-      }
-      line+= ' '
-      lines.push({
-        text: line,
-        vertices: word.boundingBox.vertices,
-      });
-      para += line
-      //console.log(line);
-      line = ''
     }
-    paragraphs.push({
-      text: para.trim(),
-      vertices: paragraph.boundingBox.vertices,
-      lines: lines.map(l=>l)
-    });
-    lines = [];
-    console.log(lines);
-  }
-}
-}
 
-return paragraphs;
+    return paragraphs;
 }
