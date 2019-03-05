@@ -3,38 +3,65 @@ const vision = require('@google-cloud/vision');
 // Creates a client
 const client = new vision.ImageAnnotatorClient();
 
-async function start() {
-  const fileName = 'image-file-name.png';
-  var response = await getVertices(fileName);
-  console.log(response);
+async function start(fileName, word) {
+  if (fileName== undefined) {
+    throw new Error("File name not found.");
+  }
+  var paragraphs = await getParaVertices(fileName);
+  if (word == undefined) {
+    return;
+  }
+  if (Array.isArray(word)) {
+    let words = word;
+    vertices = getFields(paragraphs, words);
+  }
+  if (typeof word == 'string') {
+    vertices = getFields(paragraphs, [word]);
+    if (vertices) {
+      vertices = vertices[0];
+    }
+  }
+  return vertices;
 }
 
-async function getVertices(fileName) {
+async function getParaVertices(fileName) {
   const [result] = await client.documentTextDetection(fileName);
   const annotation = result.fullTextAnnotation;
   let paragraphs = getParagraphs(annotation);
-  console.log(paragraphs);
-  let knownFields = getFields(paragraphs);
-  return knownFields;
+  return paragraphs;
 }
 
-function getFields(paragraphs){
-  let knownFields = ["Social Security Number","Name","Current Address","Contact Information",]
-  let elements = knownFields.map((f, i) => {
-      let para = paragraphs.find(p => p.text.includes(f));
+function getFields(paragraphs, words){
+  let elements = words.map((word, i) => {
+      let para = paragraphs.find(p => p.para_text.includes(word));
       if (!para){
         return null;
       }
-      let vertices = para.vertices;
-      if (para && (para.text.indexOf(f) > 1)) {
-        let firstWord = f.substr(0, f.indexOf(" "));
-        let line = para.lines.find(l => l.text.includes(firstWord));
-        vertices[0].x = line.vertices[0].x;
-        vertices[0].y = line.vertices[0].y;
 
-        console.log(line.vertices[0]);
+      let fullPara = {
+        origin: {
+          x: para.vertices.origin.x,
+          y: para.vertices.origin.y,
+        },
+        height: para.vertices.height,
+        width: para.vertices.width,
+      };
+      para.para_vertices = fullPara;
+
+      if (para && (para.para_text.indexOf(word) > 1)) {
+        let firstWord = word.trim();
+        if (word.indexOf(" ") >= 0 ) {
+          firstWord = word.substr(0, word.indexOf(" "));
+        }
+        let line = para.lines.find(l => l.text.includes(firstWord));
+        para.vertices.origin.x = line.origin.x;
+        para.vertices.origin.y = line.origin.y;
+        para.vertices.height = line.height;
+        para.vertices.width = line.width;
       }
-      para.vertices = vertices;
+
+      para.word = word;
+      delete para.lines;
       return para;
     })
     .filter(f => f != null);
@@ -61,18 +88,29 @@ function getParagraphs(annotation) {
                     line += ' '
                     lines.push({
                         text: line,
-                        vertices: word.boundingBox.vertices,
+                        // vertices: word.boundingBox.vertices,
+                        width: word.boundingBox.vertices[1].x - word.boundingBox.vertices[0].x,
+                        height: word.boundingBox.vertices[2].y - word.boundingBox.vertices[0].y,
+                        origin: word.boundingBox.vertices[0],
                     });
                     para += line
                     line = ''
                 }
                 paragraphs.push({
-                    text: para.trim(),
-                    vertices: paragraph.boundingBox.vertices,
-                    lines: lines.map(l => l)
+                    para_text: para.trim(),
+                    // vertices: paragraph.boundingBox.vertices,
+                    lines: lines.map(l => l),
+                    vertices: {
+                      width: paragraph.boundingBox.vertices[1].x - paragraph.boundingBox.vertices[0].x,
+                      height: paragraph.boundingBox.vertices[2].y - paragraph.boundingBox.vertices[0].y,
+                      origin: paragraph.boundingBox.vertices[0],
+                    },
+                    index: {
+                      page_index: parseInt(pageIndex, 0),
+                      block_index: parseInt(blockIndex, 0),
+                    }
                 });
                 lines = [];
-                console.log(lines);
             }
         }
     }
