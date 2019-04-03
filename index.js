@@ -75,6 +75,10 @@ async function findDistanceBetween(fileName, word1, word2) {
 
 }
 
+async function findWords(fileName, aruguments) {
+
+}
+
 async function getParaVertices(fileName) {
   const [result] = await client.documentTextDetection(fileName);
   const annotation = result.fullTextAnnotation;
@@ -172,4 +176,5 @@ function getParagraphs(annotation) {
 module.exports = {
   findWord,
   findDistanceBetween,
+  getParaVertices,
 }
