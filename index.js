@@ -3,7 +3,7 @@ const vision = require('@google-cloud/vision');
 // Creates a client
 const client = new vision.ImageAnnotatorClient();
 
-async function start(fileName, word) {
+async function findWord(fileName, word) {
   if (fileName== undefined) {
     throw new Error("File name not found.");
   }
@@ -22,6 +22,57 @@ async function start(fileName, word) {
     }
   }
   return vertices;
+}
+
+async function findDistanceBetween(fileName, word1, word2) {
+  let word1Position = await findWord(fileName, word1);
+  let word2Position = await findWord(fileName, word2);
+
+  let vertices1 = word1Position.vertices;
+  let vertices2 = word2Position.vertices;
+
+  let originX = vertices1.origin.x;
+  // let originX = Math.min(vertices1.origin.x, vertices2.origin.x);
+
+  // let swap = (x) => x;
+
+  // if (originX === vertices2.origin.x) {
+  //   word2Position = swap(word1Position, word1Position=word2Position);
+  //   vertices2 = swap(vertices1, vertices1=vertices2);
+  // }
+
+  let distanceX = 0;
+  let distanceY = 0;
+
+  distanceX = vertices2.origin.x - originX;
+
+  // distanceX = ((vertices1.origin.x + vertices1.width) > vertices2.origin.x)
+  //               ? (vertices2.origin.x - originX)
+  //               : (vertices2.origin.x - (originX + vertices1.width));
+
+  // let originY = Math.min(vertices1.origin.y, vertices2.origin.y);
+  let originY = vertices1.origin.y;
+
+  // if (originY === vertices2.origin.y) {
+  //   word2Position = swap(word1Position, word1Position=word2Position);
+  //   vertices2 = swap(vertices1, vertices1=vertices2);
+  // }
+
+  distanceY = vertices2.origin.y - originY;
+
+  // distanceY = ((vertices1.origin.y + vertices1.height) > vertices2.origin.y)
+  //               ? (vertices2.origin.y - originY)
+  //               : (vertices2.origin.y - (originY + vertices1.height));
+
+  console.log(distanceX, distanceY);
+
+  return {
+    distanceX,
+    distanceY,
+    word1: word1Position,
+    word2: word2Position,
+  };
+
 }
 
 async function getParaVertices(fileName) {
@@ -118,4 +169,7 @@ function getParagraphs(annotation) {
     return paragraphs;
 }
 
-module.exports = start;
+module.exports = {
+  findWord,
+  findDistanceBetween,
+}
