@@ -20,12 +20,12 @@ const wordFinder = require('imagewordfinder');
 
 To find a word in a image
 ```
-let vertices = await start.findWord('imagepath.png', "birth");
+let vertices = await wordFinder.findWord('imagepath.png', "birth");
 ```
 
 To find multiple words in a image
 ```
-let vertices = await start.findWord('imagepath.png', [
+let vertices = await wordFinder.findWord('imagepath.png', [
   "Name",
   "Current Address",
   "Contact Information",
@@ -38,13 +38,13 @@ let options = {
   caseSensitive: false,
 }
 
-let vertices = await start.findWord('imagepath.png', [
+let vertices = await wordFinder.findWord('imagepath.png', [
   "Name",
   "Current Address",
   "Contact Information",
 ], options);
 
-vertices = await start.findWord('imagepath.png', "birth", options);
+vertices = await wordFinder.findWord('imagepath.png', "birth", options);
 
 ```
 
