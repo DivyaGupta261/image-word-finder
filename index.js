@@ -3,7 +3,11 @@ const vision = require('@google-cloud/vision');
 // Creates a client
 const client = new vision.ImageAnnotatorClient();
 
-async function findWord(fileName, word) {
+const DEFAULT_OPTIONS = {
+  caseSensitive: true,
+}
+
+async function findWord(fileName, word, options = DEFAULT_OPTIONS) {
   if (fileName== undefined) {
     throw new Error("File name not found.");
   }
@@ -13,10 +17,10 @@ async function findWord(fileName, word) {
   }
   if (Array.isArray(word)) {
     let words = word;
-    vertices = getFields(paragraphs, words);
+    vertices = getFields(paragraphs, words, options);
   }
   if (typeof word == 'string') {
-    vertices = getFields(paragraphs, [word]);
+    vertices = getFields(paragraphs, [word], options);
     if (vertices) {
       vertices = vertices[0];
     }
@@ -68,7 +72,7 @@ async function findDistanceBetween(fileName, word1, word2) {
   //               ? (vertices2.origin.y - originY)
   //               : (vertices2.origin.y - (originY + vertices1.height));
 
-  console.log(distanceX, distanceY);
+  // console.log(distanceX, distanceY);
 
   return {
     distanceX,
@@ -79,13 +83,6 @@ async function findDistanceBetween(fileName, word1, word2) {
 
 }
 
-async function findWords(fileName, aruguments) {
-  if (fileName== undefined) {
-    throw new Error("File name not found.");
-  }
-
-}
-
 async function getParaVertices(fileName) {
   const [result] = await client.documentTextDetection(fileName);
   const annotation = result.fullTextAnnotation;
@@ -93,40 +90,48 @@ async function getParaVertices(fileName) {
   return paragraphs;
 }
 
-function getFields(paragraphs, words){
+function getFields(paragraphs, words, options = DEFAULT_OPTIONS){
   let elements = words.map((word, i) => {
-      let para = paragraphs.find(p => p.para_text.includes(word));
-      if (!para){
-        return null;
-      }
+    let para = paragraphs.find(p => {
+      let paraText = options.caseSensitive ? p.para_text : p.para_text.toLowerCase();
+      let wordCase = options.caseSensitive ? word : word.toLowerCase();
+      return paraText.includes(wordCase);
+    });
+    if (!para){
+      return null;
+    }
 
-      let fullPara = {
-        origin: {
-          x: para.vertices.origin.x,
-          y: para.vertices.origin.y,
-        },
-        height: para.vertices.height,
-        width: para.vertices.width,
-      };
-      para.para_vertices = fullPara;
+    let fullPara = {
+      origin: {
+        x: para.vertices.origin.x,
+        y: para.vertices.origin.y,
+      },
+      height: para.vertices.height,
+      width: para.vertices.width,
+    };
+    para.para_vertices = fullPara;
 
-      if (para && (para.para_text.indexOf(word) > 1)) {
-        let firstWord = word.trim();
-        if (word.indexOf(" ") >= 0 ) {
-          firstWord = word.substr(0, word.indexOf(" "));
-        }
-        let line = para.lines.find(l => l.text.includes(firstWord));
-        para.vertices.origin.x = line.origin.x;
-        para.vertices.origin.y = line.origin.y;
-        para.vertices.height = line.height;
-        para.vertices.width = line.width;
-      }
+    let firstWord = word.trim();
+    if (word.indexOf(" ") >= 0 ) {
+      firstWord = word.substr(0, word.indexOf(" "));
+    }
+    
+    let line = para.lines.find(l => {
+      let lineText = options.caseSensitive ? l.text : l.text.toLowerCase();
+      let firstWordCase = options.caseSensitive ? firstWord : firstWord.toLowerCase();
+      return lineText.includes(firstWordCase)
+    });
 
-      para.word = word;
-      delete para.lines;
-      return para;
-    })
-    .filter(f => f != null);
+    para.vertices.origin.x = line.origin.x;
+    para.vertices.origin.y = line.origin.y;
+    para.vertices.height = line.height;
+    para.vertices.width = line.width;
+
+    para.word = word;
+    delete para.lines;
+    return para;
+  })
+  .filter(f => f != null);
   return elements;
 }
 
