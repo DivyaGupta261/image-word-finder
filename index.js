@@ -9,7 +9,7 @@ async function findWord(fileName, word) {
   }
   var paragraphs = await getParaVertices(fileName);
   if (word == undefined) {
-    return;
+    throw new Error("Word to be found not given.");
   }
   if (Array.isArray(word)) {
     let words = word;
@@ -25,6 +25,10 @@ async function findWord(fileName, word) {
 }
 
 async function findDistanceBetween(fileName, word1, word2) {
+  if (fileName== undefined) {
+    throw new Error("File name not found.");
+  }
+
   let word1Position = await findWord(fileName, word1);
   let word2Position = await findWord(fileName, word2);
 
@@ -76,6 +80,9 @@ async function findDistanceBetween(fileName, word1, word2) {
 }
 
 async function findWords(fileName, aruguments) {
+  if (fileName== undefined) {
+    throw new Error("File name not found.");
+  }
 
 }
 
