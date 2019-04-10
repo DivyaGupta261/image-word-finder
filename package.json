@@ -14,5 +14,15 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/DivyaGupta261/image-word-finder.git"
-  }
+  },
+  "homepage": "https://github.com/DivyaGupta261/image-word-finder",
+  "keywords": [
+    "google-ocr",
+    "ocr",
+    "word",
+    "vertices",
+    "position",
+    "wordposition",
+    "image"
+  ],
 }
