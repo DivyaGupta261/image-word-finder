@@ -23,6 +23,7 @@
     "vertices",
     "position",
     "wordposition",
-    "image"
+    "image",
+    "gcp"
   ]
 }
