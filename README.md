@@ -182,7 +182,7 @@ To get all **paragraphs and words with position** in a image
 let paragraphs = await wordFinder.getParagraphs('imagepath.png');
 ```
 
-##Other Links
+## Other Links
 
 * [Using Google client library][client_library]
 
