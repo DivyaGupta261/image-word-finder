@@ -2,9 +2,10 @@
 Wrapper library for Google vision OCR to find position of a word/line/para in a image.
 
 
-Start from here: https://cloud.google.com/vision/docs/quickstart
+## Start from here:
+* [Quick Start Google OCR][quick_start]
 
-## Methods to find word from image
+## How to Use
 
 Installation
 
@@ -99,7 +100,7 @@ let yEnd = vertices.vertices.origin.y + vertices.vertices.height;
 
 ```
 
-2. To draw the boundary of word in css,
+2. To draw the boundary of word in javascript and css,
 ```
 let element = document.createElement('div');
 
@@ -175,3 +176,15 @@ The object format of distance object is as below,
 	}
 }
 ```
+
+To get all **paragraphs and words with position** in a image
+```
+let paragraphs = await wordFinder.getParagraphs('imagepath.png');
+```
+
+##Other Links
+
+* [Using Google client library][client_library]
+
+[quick_start]: https://cloud.google.com/vision/docs/quickstart-client-libraries
+[client_library]: https://cloud.google.com/vision/docs/detecting-fulltext#vision-document-text-detection-nodejs

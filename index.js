@@ -7,6 +7,11 @@ const DEFAULT_OPTIONS = {
   caseSensitive: true,
 }
 
+async function getParagraphs(fileName) {
+  let paragraphs = await getParaVertices(fileName);
+  return paragraphs;
+}
+
 async function findWord(fileName, word, options = DEFAULT_OPTIONS) {
   if (fileName== undefined) {
     throw new Error("File name not found.");
@@ -115,7 +120,7 @@ function getFields(paragraphs, words, options = DEFAULT_OPTIONS){
     if (word.indexOf(" ") >= 0 ) {
       firstWord = word.substr(0, word.indexOf(" "));
     }
-    
+
     let line = para.lines.find(l => {
       let lineText = options.caseSensitive ? l.text : l.text.toLowerCase();
       let firstWordCase = options.caseSensitive ? firstWord : firstWord.toLowerCase();
@@ -189,4 +194,5 @@ module.exports = {
   findWord,
   findDistanceBetween,
   getParaVertices,
+  getParagraphs,
 }
