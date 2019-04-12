@@ -1,8 +1,8 @@
 # image-word-finder
 Wrapper library for Google vision OCR to find position of a word/line/para in a image.
 
-
 ## Start from here:
+* [Blog on how to use Google Vision for text detection][blog_link]
 * [Quick Start Google OCR][quick_start]
 
 ## How to Use
@@ -188,3 +188,4 @@ let paragraphs = await wordFinder.getParagraphs('imagepath.png');
 
 [quick_start]: https://cloud.google.com/vision/docs/quickstart-client-libraries
 [client_library]: https://cloud.google.com/vision/docs/detecting-fulltext#vision-document-text-detection-nodejs
+[blog_link]: https://medium.com/@DivyaGupta26/using-google-cloud-vision-api-for-text-detection-with-node-js-bd54968400f2
